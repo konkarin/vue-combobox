@@ -63,6 +63,11 @@ const isActive = (index: number) => {
 const resetCurrentIndex = () => {
   currentSelectedIndex.value = -1
 }
+
+const activeOptionId = computed(() => {
+  if (currentSelectedIndex.value === -1) return undefined
+  else return `option-${currentSelectedIndex.value}`
+})
 </script>
 
 <template>
@@ -70,9 +75,14 @@ const resetCurrentIndex = () => {
     <label for="combobox">Combobox sample</label>
     <input
       id="combobox"
+      role="combobox"
       type="text"
       v-model="inputValue"
       class="combobox-input"
+      :aria-activedescendant="activeOptionId"
+      aria-autocomplete="list"
+      aria-controls="listbox"
+      :aria-expanded="`${expandedListbox}`"
       @focus="toggleListbox(true)"
       @blur="toggleListbox(false)"
       @input="resetCurrentIndex()"
@@ -82,12 +92,15 @@ const resetCurrentIndex = () => {
       @keydown.prevent.esc="onKeydownEsc()"
     />
     <!-- popup -->
-    <div v-if="expandedListbox" class="combobox-listbox">
+    <div v-if="expandedListbox" role="listbox" id="listbox" class="combobox-listbox">
       <button
         v-for="(option, index) in filteredOptions"
         :key="option"
+        role="option"
+        :id="`option-${index}`"
         class="combobox-option"
         :class="{ 'combobox-option-active': isActive(index) }"
+        :aria-selected="`${isActive(index)}`"
         @mouseover="currentSelectedIndex = index"
         @mouseleave="resetCurrentIndex()"
       >
